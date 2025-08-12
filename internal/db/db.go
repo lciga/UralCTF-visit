@@ -1,3 +1,4 @@
+// Пакет предоставляет функции для инициализации и миграции базы данных.
 package db
 
 import (
@@ -13,6 +14,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// Инициализация подключения к БД и выполнение миграции
 func Init(cfg *config.Config) error {
 	// Формируем строку подключения к базе данных
 	connStr := "host=" + cfg.DB.Host +
@@ -40,14 +42,21 @@ func Init(cfg *config.Config) error {
 	return nil
 }
 
+// Миграция БД из файла *.sql
 func migrate(db *sql.DB, dir string) error {
+	// Сканирование директории и получение всех сущностей (файлов)
 	entries, err := os.ReadDir(dir)
 	if err != nil {
 		return err
 	}
+	// Сортируем файлы по имени, чтобы гарантировать порядок выполнения миграций.
+	// Это необходимо, если у вас есть зависимости между миграциями
 	sort.Slice(entries, func(i, j int) bool {
 		return entries[i].Name() < entries[j].Name()
 	})
+	// Проходим по всем файлам в директории
+	// и выполняем их содержимое как SQL-запросы.
+	// Пропускаем директории и файлы, которые не заканчиваются на .sql
 	for _, entry := range entries {
 		if entry.IsDir() || !strings.HasSuffix(entry.Name(), ".sql") {
 			continue
@@ -64,6 +73,7 @@ func migrate(db *sql.DB, dir string) error {
 	return nil
 }
 
+// Закрытие подключения к базе данных
 func Close(db *sql.DB) {
 	if err := db.Close(); err != nil {
 		logger.Errorf("Ошибка при закрытии базы данных: %v", err)
