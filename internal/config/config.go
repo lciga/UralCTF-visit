@@ -43,14 +43,23 @@ type Config struct {
 	}
 }
 
+var (
+	loaded bool
+	config = &Config{}
+)
+
 // Загрузка конфигурации из переменных окружения.
 // Возвращает указатель на Config и ошибку
 func Load() (*Config, error) {
+	// Если конфигурация уже загружена, возвращаем ее
+	if loaded {
+		return config, nil
+	}
+
 	err := godotenv.Load()
 	if err != nil {
 		return nil, err
 	}
-	config := &Config{}
 	config.ServerPort = os.Getenv("SERVER_PORT")
 
 	config.DB.Host = os.Getenv("DB_HOST")
@@ -84,5 +93,6 @@ func Load() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	loaded = true // Устанавливаем флаг, что конфигурация загружена
 	return config, nil
 }
