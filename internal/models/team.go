@@ -6,5 +6,5 @@ type Team struct {
 	City         string        `db:"city" json:"city"`
 	University   string        `db:"university" json:"university"`
 	CreatedAt    string        `db:"created_at" json:"created_at"`
-	Participants []Participant `db:"participants,omitempty" json:"participants,omitempty"`
+	Participants []Participant `db:"participants" json:"participants"`
 }

@@ -4,18 +4,18 @@ package db
 import (
 	"UralCTF-visit/internal/config"
 	"UralCTF-visit/internal/logger"
-	"database/sql"
 	"os"
 	"path/filepath"
 	"sort"
 	"strconv"
 	"strings"
 
+	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 )
 
 // Инициализация подключения к БД и выполнение миграции
-func Init(cfg *config.Config) error {
+func Init(cfg *config.Config) (*sqlx.DB, error) {
 	// Формируем строку подключения к базе данных
 	connStr := "host=" + cfg.DB.Host +
 		" port=" + strconv.Itoa(cfg.DB.Port) +
@@ -25,25 +25,25 @@ func Init(cfg *config.Config) error {
 		" sslmode=" + cfg.DB.SSLMode
 
 	// Подключаемся к базе данных
-	db, err := sql.Open("postgres", connStr)
+	db, err := sqlx.Open("postgres", connStr)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	// Проверяем подключение
 	if err = db.Ping(); err != nil {
-		return err
+		return nil, err
 	}
 	// Выполняем миграции базы данных
 	// Используем корректный путь к папке миграций
 	if err := migrate(db, filepath.Join("internal", "db", "migrations")); err != nil {
 		_ = db.Close()
-		return err
+		return nil, err
 	}
-	return nil
+	return db, nil
 }
 
 // Миграция БД из файла *.sql
-func migrate(db *sql.DB, dir string) error {
+func migrate(db *sqlx.DB, dir string) error {
 	// Сканирование директории и получение всех сущностей (файлов)
 	entries, err := os.ReadDir(dir)
 	if err != nil {
@@ -74,7 +74,7 @@ func migrate(db *sql.DB, dir string) error {
 }
 
 // Закрытие подключения к базе данных
-func Close(db *sql.DB) {
+func Close(db *sqlx.DB) {
 	if err := db.Close(); err != nil {
 		logger.Errorf("Ошибка при закрытии базы данных: %v", err)
 	}
