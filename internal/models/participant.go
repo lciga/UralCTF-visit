@@ -11,6 +11,6 @@ type Participant struct {
 	Course     int    `db:"course" json:"course"`
 	Email      string `db:"email" json:"email"`
 	ShirtSize  string `db:"shirt_size" json:"shirt_size"`
-	IsCapitan  bool   `db:"is_captain" json:"is_captain"`
+	IsCaptain  bool   `db:"is_captain" json:"is_captain"`
 	CreatedAt  string `db:"created_at" json:"created_at"`
 }

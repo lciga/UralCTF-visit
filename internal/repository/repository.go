@@ -3,27 +3,38 @@
 package repository
 
 import (
+	"database/sql"
+
 	"github.com/jmoiron/sqlx"
 )
 
+// DBX объединяет возможности *sqlx.DB и *sqlx.Tx для выполнения запросов
+type DBX interface {
+	Exec(query string, args ...interface{}) (sql.Result, error)
+	Get(dest interface{}, query string, args ...interface{}) error
+	Select(dest interface{}, query string, args ...interface{}) error
+	QueryRowx(query string, args ...interface{}) *sqlx.Row
+	Queryx(query string, args ...interface{}) (*sqlx.Rows, error)
+}
+
 // Репозиторий для работы с командами
 type TeamRepository struct {
-	db *sqlx.DB
+	db DBX
 }
 
 // Репозиторий для работы с участниками
 type ParticipantRepository struct {
-	db *sqlx.DB
+	db DBX
 }
 
 // Создание нового репозитория для работы с командами.
-// Используется для инициализации репозитория с доступом к базе данных
-func NewTeamRepository(db *sqlx.DB) *TeamRepository {
+// Принимает либо *sqlx.DB, либо *sqlx.Tx.
+func NewTeamRepository(db DBX) *TeamRepository {
 	return &TeamRepository{db: db}
 }
 
 // Создание нового репозитория для работы с участниками.
-// Используется для инициализации репозитория с доступом к базе данных
-func NewParticipantRepository(db *sqlx.DB) *ParticipantRepository {
+// Принимает либо *sqlx.DB, либо *sqlx.Tx.
+func NewParticipantRepository(db DBX) *ParticipantRepository {
 	return &ParticipantRepository{db: db}
 }
