@@ -9,10 +9,14 @@ CREATE TABLE IF NOT EXISTS teams (
 CREATE TABLE IF NOT EXISTS participants (
     id BIGSERIAL PRIMARY KEY,
     team_id BIGINT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
-    full_name TEXT NOT NULL,
+    first_name TEXT NOT NULL,
+    last_name TEXT NOT NULL,
+    middle_name TEXT,
     telegram TEXT NOT NULL,
     phone TEXT NOT NULL,
     course SMALLINT NOT NULL CHECK (course >= 1 AND course <= 6),
+    email TEXT NOT NULL,
+    shirt_size TEXT NOT NULL CHECK (shirt_size IN ('XS', 'S', 'M', 'L', 'XL', 'XXL')),
     is_captain BOOLEAN NOT NULL DEFAULT FALSE,
     created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
