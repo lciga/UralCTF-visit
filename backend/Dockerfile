@@ -21,17 +21,20 @@ RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main ./cmd/server
 
 # Финальный образ
 FROM alpine:latest
-
 # Устанавливаем ca-certificates для HTTPS запросов
 RUN apk --no-cache add ca-certificates
 
-WORKDIR /root/
+# Рабочая директория приложения
+WORKDIR /app
 
 # Копируем собранное приложение из builder стадии
 COPY --from=builder /app/main .
 
-# Копируем конфигурационные файлы если они есть
+# Копируем миграции
 COPY --from=builder /app/internal/db/migrations ./internal/db/migrations
+
+# Создаём директорию для логов
+RUN mkdir -p ./logs
 
 # Открываем порт
 EXPOSE 8080

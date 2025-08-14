@@ -3,6 +3,7 @@ module UralCTF-visit
 go 1.24.5
 
 require (
+	github.com/gin-contrib/cors v1.3.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1

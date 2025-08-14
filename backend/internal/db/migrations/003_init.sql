@@ -15,7 +15,7 @@ CREATE TEMP TABLE tmp_university (
     address TEXT
 );
 COPY tmp_university(name, region, city, address)
-FROM '/docker-entrypoint-initdb.d/university.csv'
+FROM '/docker-entrypoint-initdb.d/tables/university.csv'
 WITH (FORMAT csv, DELIMITER ';', HEADER true, ENCODING 'UTF8');
 
 INSERT INTO universities(name, city_id, address)

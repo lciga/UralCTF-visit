@@ -48,18 +48,18 @@ var (
 	config = &Config{}
 )
 
-// Загрузка конфигурации из переменных окружения.
-// Возвращает указатель на Config и ошибку
+// Load загружает конфигурацию из переменных окружения.
+// Возвращает указатель на Config и ошибку.
 func Load() (*Config, error) {
 	// Если конфигурация уже загружена, возвращаем ее
 	if loaded {
 		return config, nil
 	}
+	// Объявляем переменную для обработки ошибок
+	var err error
 
-	err := godotenv.Load()
-	if err != nil {
-		return nil, err
-	}
+	// Load environment variables from .env file if present; ignore error
+	_ = godotenv.Load()
 	config.ServerPort = os.Getenv("SERVER_PORT")
 
 	config.DB.Host = os.Getenv("DB_HOST")

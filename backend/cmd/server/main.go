@@ -25,5 +25,6 @@ func main() {
 
 	handler := handlers.NewHandler(db)
 	r := server.NewRouter(handler)
+	logger.Infof("Запуск сервера на порту %s", cfg.ServerPort)
 	r.Run()
 }

@@ -12,7 +12,7 @@ CREATE TEMP TABLE tmp_location (
     city TEXT
 );
 COPY tmp_location(region, city)
-FROM '/docker-entrypoint-initdb.d/city.csv'
+FROM '/docker-entrypoint-initdb.d/tables/city.csv'
 WITH (FORMAT csv, DELIMITER ';', HEADER true, ENCODING 'UTF8');
 
 -- Insert distinct region-city associations

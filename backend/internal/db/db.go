@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -16,6 +17,7 @@ import (
 
 // Инициализация подключения к БД и выполнение миграции
 func Init(cfg *config.Config) (*sqlx.DB, error) {
+	logger.Infof("Connecting to DB at %s:%d", cfg.DB.Host, cfg.DB.Port)
 	// Формируем строку подключения к базе данных
 	connStr := "host=" + cfg.DB.Host +
 		" port=" + strconv.Itoa(cfg.DB.Port) +
@@ -29,9 +31,18 @@ func Init(cfg *config.Config) (*sqlx.DB, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Проверяем подключение
-	if err = db.Ping(); err != nil {
-		return nil, err
+	// Проверяем подключение с повторными попытками, пока БД не станет доступна
+	var pingErr error
+	for i := 0; i < 10; i++ {
+		pingErr = db.Ping()
+		if pingErr == nil {
+			break
+		}
+		logger.Warnf("Не удалось подключиться к БД (попытка %d): %v", i+1, pingErr)
+		time.Sleep(2 * time.Second)
+	}
+	if pingErr != nil {
+		return nil, pingErr
 	}
 	// Выполняем миграции базы данных
 	// Используем корректный путь к папке миграций

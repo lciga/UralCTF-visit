@@ -33,4 +33,4 @@ go.work.sum
 # .idea/
 .vscode/
 
-logs/*
+backend/logs/*

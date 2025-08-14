@@ -9,15 +9,14 @@ import (
 )
 
 func (h *Handler) GetUniversity(c *gin.Context) {
-   // Получаем имя города из параметра city
-   city := c.Query("city")
-   if city == "" {
-	   c.JSON(http.StatusBadRequest, gin.H{"error": "City query parameter is required"})
-	   return
-   }
-
+	// Получаем имя города из параметра city
+	city := c.Query("city")
+	if city == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "City query parameter is required"})
+		return
+	}
 	repo := repository.NewUniversityRepository(h.db)
-   universities, err := repo.GetUniversityByCity(city)
+	universities, err := repo.SearchByCity(city)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		logger.Errorf("Ошибка получения университетов по городу %s: %v", city, err)

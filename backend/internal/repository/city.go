@@ -10,3 +10,13 @@ func (r *CityRepository) GetCityId(name string) (int, error) {
 	}
 	return cityId, nil // Возвращаем идентификатор города
 }
+
+// SearchCities возвращает список названий городов, соответствующих запросу.
+func (r *CityRepository) SearchCities(query string) ([]string, error) {
+	var cities []string
+	sql := `SELECT name FROM city WHERE name ILIKE $1 ORDER BY name LIMIT 50` // фильтрация по шаблону
+	if err := r.db.Select(&cities, sql, "%"+query+"%"); err != nil {
+		return nil, err
+	}
+	return cities, nil
+}
