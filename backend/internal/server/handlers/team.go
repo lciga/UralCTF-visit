@@ -113,7 +113,7 @@ func (h *Handler) CreateTeam(c *gin.Context) {
 	// Создаём команду
 	teamID, err := repository.NewTeamRepository(tx).CreateTeam(models.Team{
 		Name:         req.Name,
-		City:         cityID,
+		CityID:       cityID,
 		UniversityID: req.UniversityID,
 	})
 	if err != nil {

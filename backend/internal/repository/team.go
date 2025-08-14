@@ -79,7 +79,7 @@ func (r *TeamRepository) CreateTeam(team models.Team) (int, error) {
 		RETURNING id
 	`
 	var id int
-	if err := r.db.QueryRowx(query, team.Name, team.City, team.UniversityID).Scan(&id); err != nil {
+	if err := r.db.QueryRowx(query, team.Name, team.CityID, team.UniversityID).Scan(&id); err != nil {
 		return 0, err
 	}
 	return id, nil
