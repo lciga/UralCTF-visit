@@ -57,15 +57,6 @@ CREATE UNIQUE INDEX IF NOT EXISTS uniq_captain_per_team
 ON participants(team_id)
 WHERE is_captain = TRUE;
 
-CREATE TABLE IF NOT EXISTS consents (
-    id BIGSERIAL PRIMARY KEY,
-    team_id BIGINT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,
-    pdn_captain BOOLEAN NOT NULL,
-    pdn_team BOOLEAN NOT NULL,
-    rules_ack BOOLEAN NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT NOW()
-);
-
 CREATE TABLE IF NOT EXISTS emails_log (
     id BIGSERIAL PRIMARY KEY,
     team_id BIGINT NOT NULL REFERENCES teams(id) ON DELETE CASCADE,

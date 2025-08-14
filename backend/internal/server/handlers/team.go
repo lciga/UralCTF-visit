@@ -57,10 +57,13 @@ func (h *Handler) GetTeams(c *gin.Context) {
 
 // DTO для приёма JSON в одном теле
 type CreateTeamRequest struct {
-	Name         string               `json:"name" binding:"required"`
-	City         string               `json:"city" binding:"required"`
-	UniversityID int                  `json:"university_id" binding:"required"`
-	Participants []models.Participant `json:"participants" binding:"required,dive"`
+	Name                 string               `json:"name" binding:"required"`
+	City                 string               `json:"city" binding:"required"`
+	UniversityID         int                  `json:"university_id" binding:"required"`
+	Participants         []models.Participant `json:"participants" binding:"required,dive"`
+	ConsentPDCapitan     bool                 `json:"consent_capitan" binding:"required"`
+	ConsentPDParticipant bool                 `json:"consent_participant" binding:"required"`
+	ConsentRules         bool                 `json:"consent_rules" binding:"required"`
 }
 
 // POST /api/teams/ - регистрация новой команды и возвращение её идентификатора.
@@ -126,6 +129,10 @@ func (h *Handler) CreateTeam(c *gin.Context) {
 	if err = repository.NewParticipantRepository(tx).AddParticipants(req.Participants); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		logger.Errorf("Ошибка добавления участников: %v", err)
+		return
+	}
+	if !(req.ConsentPDCapitan && req.ConsentRules && req.ConsentPDParticipant) {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Все обязательные согласия должны быть подтверждены"})
 		return
 	}
 
