@@ -6,6 +6,7 @@ package mail
 import (
 	"UralCTF-visit/internal/logger"
 	"crypto/tls"
+	"encoding/base64"
 	"fmt"
 	"net/smtp"
 )
@@ -43,10 +44,14 @@ func (m Mailer) SendMail(to, subject, body string) error {
 	logger.Infof("Mail: START SendMail to=%s subject=%s via %s", to, subject, addr)
 
 	// 1. Собираем сообщение
+	// Encode subject for non-ASCII characters
+	encodedSubject := "=?UTF-8?B?" + base64.StdEncoding.EncodeToString([]byte(subject)) + "?="
 	msg := []byte(fmt.Sprintf(
-		"From: %s\r\nTo: %s\r\nSubject: %s\r\n"+
+		"From: %s\r\n"+
+			"To: %s\r\n"+
+			"Subject: %s\r\n"+
 			"MIME-Version: 1.0\r\nContent-Type: text/html; charset=\"UTF-8\"\r\n\r\n%s",
-		m.From, to, subject, body,
+		m.From, to, encodedSubject, body,
 	))
 	logger.Debugf("Mail: message built, %d bytes", len(msg))
 

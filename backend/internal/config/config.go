@@ -15,12 +15,12 @@ type Config struct {
 	// Конфигурация базы данных.
 	// Используется для подключения к PostgreSQL
 	DB struct {
-		Host     string `env:"DB_HOST"`                    // Хост базы данных
-		Port     int    `env:"DB_PORT"`                    // Порт базы данных
-		User     string `env:"DB_USER"`                    // Пользователь базы данных
-		Password string `env:"DB_PASSWORD"`                // Пароль пользователя базы данных
-		Name     string `env:"DB_NAME"`                    // Имя базы данных
-		SSLMode  string `env:"DB_SSLMODE,default=disable"` // Режим SSL для подключения к базе данных
+		Host     string `env:"POSTGRES_HOST"`                    // Хост базы данных
+		Port     int    `env:"POSTGRES_PORT"`                    // Порт базы данных
+		User     string `env:"POSTGRES_USER"`                    // Пользователь базы данных
+		Password string `env:"POSTGRES_PASSWORD"`                // Пароль пользователя базы данных
+		Name     string `env:"POSTGRES_NAME"`                    // Имя базы данных
+		SSLMode  string `env:"POSTGRES_SSLMODE,default=disable"` // Режим SSL для подключения к базе данных
 	}
 
 	// Конфигурация SMTP для отправки писем
@@ -40,6 +40,7 @@ type Config struct {
 		MaxSize    int    `env:"LOG_MAX_SIZE,default=10"`   // Максимальный размер файла лога в Мб
 		MaxBackups int    `env:"LOG_MAX_BACKUPS,default=5"` // Максимальное количество резервных копий логов
 		MaxAge     int    `env:"LOG_MAX_AGE,default=30"`    // Максимальный возраст логов в днях
+		Level      string `env:"LOG_LEVEL,default=info"`
 	}
 }
 
@@ -62,12 +63,12 @@ func Load() (*Config, error) {
 	_ = godotenv.Load()
 	config.ServerPort = os.Getenv("SERVER_PORT")
 
-	config.DB.Host = os.Getenv("DB_HOST")
-	config.DB.Port, _ = strconv.Atoi(os.Getenv("DB_PORT"))
-	config.DB.User = os.Getenv("DB_USER")
-	config.DB.Password = os.Getenv("DB_PASSWORD")
-	config.DB.Name = os.Getenv("DB_NAME")
-	config.DB.SSLMode = os.Getenv("DB_SSLMODE")
+	config.DB.Host = os.Getenv("POSTGRES_HOST")
+	config.DB.Port, _ = strconv.Atoi(os.Getenv("POSTGRES_PORT"))
+	config.DB.User = os.Getenv("POSTGRES_USER")
+	config.DB.Password = os.Getenv("POSTGRES_PASSWORD")
+	config.DB.Name = os.Getenv("POSTGRES_NAME")
+	config.DB.SSLMode = os.Getenv("POSTGRES_SSLMODE")
 
 	config.SMTP.Host = os.Getenv("SMTP_HOST")
 	config.SMTP.Port, err = strconv.Atoi(os.Getenv("SMTP_PORT"))
@@ -93,6 +94,7 @@ func Load() (*Config, error) {
 	if err != nil {
 		return nil, err
 	}
+	config.Logger.Level = os.Getenv("LOG_LEVEL")
 	loaded = true // Устанавливаем флаг, что конфигурация загружена
 	return config, nil
 }

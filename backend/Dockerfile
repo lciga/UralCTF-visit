@@ -32,6 +32,8 @@ COPY --from=builder /app/main .
 
 # Копируем миграции
 COPY --from=builder /app/internal/db/migrations ./internal/db/migrations
+# Копируем шаблоны писем
+COPY --from=builder /app/internal/mail/templates ./internal/mail/templates
 
 # Создаём директорию для логов
 RUN mkdir -p ./logs

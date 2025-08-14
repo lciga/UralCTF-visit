@@ -11,11 +11,22 @@ func (r *CityRepository) GetCityId(name string) (int, error) {
 	return cityId, nil // Возвращаем идентификатор города
 }
 
+type CitySearchResult struct {
+	ID   int    `db:"id" json:"id"`
+	Name string `db:"name" json:"name"`
+}
+
 // SearchCities возвращает список названий городов, соответствующих запросу.
-func (r *CityRepository) SearchCities(query string) ([]string, error) {
-	var cities []string
-	sql := `SELECT name FROM city WHERE name ILIKE $1 ORDER BY name LIMIT 50` // фильтрация по шаблону
-	if err := r.db.Select(&cities, sql, "%"+query+"%"); err != nil {
+func (r *CityRepository) SearchCities(query string) ([]CitySearchResult, error) {
+	var cities []CitySearchResult
+	// фильтрация по префиксу, выдаем до 50 результатов
+	// возвращаем только города, имя которых начинается с запроса
+	prefix := query + "%"
+	sql := `SELECT id, name FROM city
+			WHERE name ILIKE $1
+			ORDER BY name
+			LIMIT 50`
+	if err := r.db.Select(&cities, sql, prefix); err != nil {
 		return nil, err
 	}
 	return cities, nil

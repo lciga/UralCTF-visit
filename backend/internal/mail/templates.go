@@ -13,7 +13,8 @@ type TemplateData map[string]any
 
 // Рендер содержимого письма на основе шаблона в формате HTML.
 func RenderTemplate(templateName string, data TemplateData) (string, error) {
-	path := filepath.Join("internal", "mail", "template", templateName)
+	// Путь к папке с HTML-шаблонами
+	path := filepath.Join("internal", "mail", "templates", templateName)
 
 	t, err := template.ParseFiles(path)
 	if err != nil {

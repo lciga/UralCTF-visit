@@ -1,13 +1,17 @@
 package handlers
 
 import (
+	"UralCTF-visit/internal/config"
 	"UralCTF-visit/internal/logger"
+	"UralCTF-visit/internal/mail"
 	"UralCTF-visit/internal/models"
 	"UralCTF-visit/internal/repository"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
+
+var cfg, _ = config.Load()
 
 // GET /api/teams/check-name - проверка уникальности имени команды.
 // Этот метод проверяет, существует ли команда с данным именем.
@@ -130,6 +134,26 @@ func (h *Handler) CreateTeam(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return
 	}
+
+	// Отправляем письмо о получении заявки асинхронно
+	go func(recipientEmail, recipientName, teamName string) {
+		logger.Infof("Начинаем отправку подтверждения заявки на %s", recipientEmail)
+		data := mail.TemplateData{
+			"RecipientName": recipientName,
+			"TeamName":      teamName,
+		}
+		body, err := mail.RenderTemplate("application_received.html", data)
+		if err != nil {
+			logger.Errorf("Ошибка рендеринга шаблона письма: %v", err)
+			return
+		}
+		m := mail.NewMailer(cfg.SMTP.Host, cfg.SMTP.Port, cfg.SMTP.User, cfg.SMTP.Password, cfg.SMTP.From)
+		if err := m.SendMail(recipientEmail, "Заявка получена", body); err != nil {
+			logger.Errorf("Ошибка отправки подтверждения заявки: %v", err)
+		} else {
+			logger.Infof("Письмо подтверждения заявки успешно отправлено на %s", recipientEmail)
+		}
+	}(req.Participants[0].Email, req.Participants[0].FirstName, req.Name)
 
 	c.JSON(http.StatusCreated, gin.H{"team_id": teamID})
 	logger.Infof("Команда успешно зарегистрирована с ID: %d", teamID)

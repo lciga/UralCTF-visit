@@ -24,13 +24,6 @@ func NewRouter(handler *handlers.Handler) *gin.Engine {
 	cfg, err := config.Load()
 	if err != nil {
 		logger.Errorf("Ошибка загрузки конфигурации для роутера: %v", err)
-		// При ошибке конфигурации используем директорию ./logs
-		cfg = &config.Config{Logger: struct {
-			LogDir     string "env:\"LOG_DIR,default=./logs\""
-			MaxSize    int    "env:\"LOG_MAX_SIZE,default=10\""
-			MaxBackups int    "env:\"LOG_MAX_BACKUPS,default=5\""
-			MaxAge     int    "env:\"LOG_MAX_AGE,default=30\""
-		}{LogDir: "./logs", MaxSize: 10, MaxBackups: 5, MaxAge: 30}}
 	}
 	// Создаём Gin без middleware по умолчанию
 	r := gin.New()
@@ -60,8 +53,6 @@ func NewRouter(handler *handlers.Handler) *gin.Engine {
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
 	}))
-	// Endpoint for searching cities
-	r.GET("/api/cities/search", handler.SearchCities)
 
 	teams := r.Group("/api/teams")
 	{
@@ -71,6 +62,7 @@ func NewRouter(handler *handlers.Handler) *gin.Engine {
 	search := r.Group("/api/search")
 	{
 		search.GET("/university", handler.GetUniversity) // Поиск университетов по городу
+		search.GET("/city", handler.SearchCities)        // Поиск городов по запросу
 	}
 	return r
 }
