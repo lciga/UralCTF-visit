@@ -55,7 +55,7 @@ func (h *Handler) GetTeams(c *gin.Context) {
 type CreateTeamRequest struct {
 	Name         string               `json:"name" binding:"required"`
 	City         string               `json:"city" binding:"required"`
-	University   string               `json:"university" binding:"required"`
+	UniversityID int                  `json:"university_id" binding:"required"`
 	Participants []models.Participant `json:"participants" binding:"required,dive"`
 }
 
@@ -95,11 +95,19 @@ func (h *Handler) CreateTeam(c *gin.Context) {
 		}
 	}()
 
+	// Получаем ID города по имени
+	cityID, err := repository.NewCityRepository(tx).GetCityId(req.City)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "City not found"})
+		logger.Errorf("Ошибка получения ID города: %v", err)
+		return
+	}
+
 	// Создаём команду
 	teamID, err := repository.NewTeamRepository(tx).CreateTeam(models.Team{
-		Name:       req.Name,
-		City:       req.City,
-		University: req.University,
+		Name:         req.Name,
+		City:         cityID,
+		UniversityID: req.UniversityID,
 	})
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
@@ -107,7 +115,7 @@ func (h *Handler) CreateTeam(c *gin.Context) {
 		return
 	}
 
-	// 3) привязываем участников к новосозданному teamID
+	// Привязываем участников к новосозданному teamID
 	for i := range req.Participants {
 		req.Participants[i].TeamID = teamID
 	}
@@ -117,7 +125,7 @@ func (h *Handler) CreateTeam(c *gin.Context) {
 		return
 	}
 
-	// 4) коммит транзакции
+	// Коммит транзакции
 	if err = tx.Commit(); err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Internal server error"})
 		return

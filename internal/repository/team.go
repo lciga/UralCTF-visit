@@ -23,27 +23,36 @@ type TeamFilter struct {
 	Course     int
 }
 
-// Метод для получения списка команд с возможностью фильтрации по городу и университету.
-// Возвращает список команд, соответствующих критериям фильтрации.
-// Если фильтр не задан, возвращает все команды.
+// Метод для получения списка команд с возможностью фильтрации по городам и университетам.
 func (r *TeamRepository) GetTeams(filter TeamFilter) ([]models.Team, error) {
+	// Join city, region, and university for filtering by names
 	query := `
-        SELECT t.id, t.name, t.city, t.university, t.created_at
-        FROM teams t
-    `
+		SELECT t.id,
+			   t.name,
+			   t.city,
+			   t.university AS university_id,
+			   t.created_at
+		FROM teams t
+		JOIN city c ON t.city = c.id
+		JOIN region_city rc ON c.id = rc.city_id
+		JOIN region r ON rc.region_id = r.id
+		JOIN universities u ON t.university = u.id
+	`
 
 	conditions := []string{}
 	args := []interface{}{}
 	argPos := 1
 
 	if filter.City != "" {
-		conditions = append(conditions, fmt.Sprintf("t.city = $%d", argPos))
-		args = append(args, filter.City)
+		// Filter by city or region name
+		conditions = append(conditions, fmt.Sprintf("(c.name ILIKE $%d OR r.name ILIKE $%d)", argPos, argPos))
+		args = append(args, "%"+filter.City+"%")
 		argPos++
 	}
 	if filter.University != "" {
-		conditions = append(conditions, fmt.Sprintf("t.university = $%d", argPos))
-		args = append(args, filter.University)
+		// Filter by university name
+		conditions = append(conditions, fmt.Sprintf("u.name ILIKE $%d", argPos))
+		args = append(args, "%"+filter.University+"%")
 		argPos++
 	}
 
@@ -63,13 +72,14 @@ func (r *TeamRepository) GetTeams(filter TeamFilter) ([]models.Team, error) {
 // Метод для создания новой команды в базе данных.
 // Возвращает ID созданной команды
 func (r *TeamRepository) CreateTeam(team models.Team) (int, error) {
+	// Insert using new column names
 	query := `
 		INSERT INTO teams (name, city, university)
 		VALUES ($1, $2, $3)
 		RETURNING id
 	`
 	var id int
-	if err := r.db.QueryRowx(query, team.Name, team.City, team.University).Scan(&id); err != nil {
+	if err := r.db.QueryRowx(query, team.Name, team.City, team.UniversityID).Scan(&id); err != nil {
 		return 0, err
 	}
 	return id, nil

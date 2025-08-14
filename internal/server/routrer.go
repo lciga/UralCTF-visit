@@ -19,8 +19,7 @@ func NewRouter(handler *handlers.Handler) *gin.Engine {
 	}
 	search := r.Group("/api/search")
 	{
-		search.GET("/city", handler.SearchCities)             // Поиск городов
-		search.GET("/university", handler.SearchUniversities) // Поиск университетов в городе
+		search.GET("/university", handler.GetUniversity) // Поиск университетов по городу
 	}
 	return r
 }

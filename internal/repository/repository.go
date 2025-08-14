@@ -27,14 +27,34 @@ type ParticipantRepository struct {
 	db DBX
 }
 
+// Репозиторий для работы с городами
+type CityRepository struct {
+	db DBX
+}
+
+// Репозиторий для работы с университетами
+type UniversityRepository struct {
+	db DBX
+}
+
 // Создание нового репозитория для работы с командами.
 // Принимает либо *sqlx.DB, либо *sqlx.Tx.
 func NewTeamRepository(db DBX) *TeamRepository {
 	return &TeamRepository{db: db}
 }
 
+// Создание нового репозитория для работы с городами.
+func NewCityRepository(db DBX) *CityRepository {
+	return &CityRepository{db: db}
+}
+
 // Создание нового репозитория для работы с участниками.
 // Принимает либо *sqlx.DB, либо *sqlx.Tx.
 func NewParticipantRepository(db DBX) *ParticipantRepository {
 	return &ParticipantRepository{db: db}
+}
+
+// Создание нового репозитория для работы с университетами.
+func NewUniversityRepository(db DBX) *UniversityRepository {
+	return &UniversityRepository{db: db}
 }
