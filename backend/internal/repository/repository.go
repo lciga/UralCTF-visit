@@ -37,6 +37,11 @@ type UniversityRepository struct {
 	db DBX
 }
 
+// Репозиторий для логирования писем
+type MailRepository struct {
+	db DBX
+}
+
 // Создание нового репозитория для работы с командами.
 // Принимает либо *sqlx.DB, либо *sqlx.Tx.
 func NewTeamRepository(db DBX) *TeamRepository {
@@ -57,4 +62,9 @@ func NewParticipantRepository(db DBX) *ParticipantRepository {
 // Создание нового репозитория для работы с университетами.
 func NewUniversityRepository(db DBX) *UniversityRepository {
 	return &UniversityRepository{db: db}
+}
+
+// Создание нового репозитория для логирования писем.
+func NewMailRepository(db DBX) *MailRepository {
+	return &MailRepository{db: db}
 }

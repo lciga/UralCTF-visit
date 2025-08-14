@@ -136,7 +136,7 @@ func (h *Handler) CreateTeam(c *gin.Context) {
 	}
 
 	// Отправляем письмо о получении заявки асинхронно
-	go func(recipientEmail, recipientName, teamName string) {
+	go func(teamID int, recipientEmail, recipientName, teamName string) {
 		logger.Infof("Начинаем отправку подтверждения заявки на %s", recipientEmail)
 		data := mail.TemplateData{
 			"RecipientName": recipientName,
@@ -148,12 +148,21 @@ func (h *Handler) CreateTeam(c *gin.Context) {
 			return
 		}
 		m := mail.NewMailer(cfg.SMTP.Host, cfg.SMTP.Port, cfg.SMTP.User, cfg.SMTP.Password, cfg.SMTP.From)
-		if err := m.SendMail(recipientEmail, "Заявка получена", body); err != nil {
-			logger.Errorf("Ошибка отправки подтверждения заявки: %v", err)
+		var status, sendErr string
+		if err2 := m.SendMail(recipientEmail, "Заявка получена", body); err2 != nil {
+			status = "failed"
+			sendErr = err2.Error()
+			logger.Errorf("Ошибка отправки подтверждения заявки: %v", err2)
 		} else {
+			status = "sent"
 			logger.Infof("Письмо подтверждения заявки успешно отправлено на %s", recipientEmail)
 		}
-	}(req.Participants[0].Email, req.Participants[0].FirstName, req.Name)
+		// Логируем факт отправки письма в базу
+		mailRepo := repository.NewMailRepository(h.db)
+		if err3 := mailRepo.LogMail(teamID, recipientEmail, "Заявка получена", status, sendErr); err3 != nil {
+			logger.Errorf("Ошибка логирования письма в БД: %v", err3)
+		}
+	}(teamID, req.Participants[0].Email, req.Participants[0].FirstName, req.Name)
 
 	c.JSON(http.StatusCreated, gin.H{"team_id": teamID})
 	logger.Infof("Команда успешно зарегистрирована с ID: %d", teamID)
