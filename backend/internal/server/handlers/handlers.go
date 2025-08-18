@@ -23,3 +23,12 @@ type Config struct {
 func NewHandler(db *sqlx.DB) *Handler {
 	return &Handler{db: db}
 }
+
+// swagger:response ErrorResponse
+// Ошибка ответа
+type ErrorResponse struct {
+	// in:body
+	Body struct {
+		Error string `json:"error"`
+	}
+}

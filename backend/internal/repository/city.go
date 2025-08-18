@@ -11,6 +11,8 @@ func (r *CityRepository) GetCityId(name string) (int, error) {
 	return cityId, nil // Возвращаем идентификатор города
 }
 
+// swagger:model CitySearchResult
+// CitySearchResult представляет результат поиска городов
 type CitySearchResult struct {
 	ID   int    `db:"id" json:"id"`
 	Name string `db:"name" json:"name"`

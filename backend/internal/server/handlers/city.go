@@ -8,7 +8,33 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SearchCities handles GET /api/cities/search
+// swagger:parameters searchCitiesParams
+// Поиск городов по запросу
+//
+// in: query
+// name: query
+// required: true
+// description: Запрос для поиска городов
+type searchCitiesParams struct {
+	Query string `json:"query"`
+}
+
+// swagger:response CityList
+// Список городов отправляемый в ответе
+type CityList struct {
+	// in:body
+	Body []repository.CitySearchResult
+}
+
+// swagger:route GET /api/search/city search searchCities
+//
+// Поиск городов по параметру запроса
+// responses:
+//
+//	200: CityList
+//	500: ErrorResponse
+//
+// SearchCities эндпоинт GET /api/cities/search
 func (h *Handler) SearchCities(c *gin.Context) {
 	query := c.Query("query")
 	// Не возвращаем все города при пустом запросе

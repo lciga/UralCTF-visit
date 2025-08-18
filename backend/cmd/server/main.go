@@ -1,3 +1,20 @@
+// Package classification UralCTF API.
+//
+// Бэкенд сайта UralCTF.
+//
+//	Schemes: http, https
+//	BasePath: /api
+//	Version: 0.1.0
+//	Title: UralCTF API
+//	Description: REST API для сайта турнира.
+//
+//	Consumes:
+//	- application/json
+//
+//	Produces:
+//	- application/json
+//
+// swagger:meta
 package main
 
 import (

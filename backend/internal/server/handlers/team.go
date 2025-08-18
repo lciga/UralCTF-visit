@@ -13,10 +13,33 @@ import (
 
 var cfg, _ = config.Load()
 
-// GET /api/teams/check-name - проверка уникальности имени команды.
-// Этот метод проверяет, существует ли команда с данным именем.
-// Если команда с таким именем уже существует, возвращает ошибку.
-// Если команда с таким именем не существует, возвращает успешный ответ
+// swagger:response BoolAvailability
+// Запрос на проверку доступности имени команды
+type BoolAvailability struct {
+	// in:body
+	Body struct {
+		Available bool `json:"available"`
+	}
+}
+
+// swagger:parameters checkTeamName
+// Проверка доступности имени команды
+//
+// in: query
+// name: name
+// required: true
+// description: Имя команды для проверки
+type checkTeamNameParams struct {
+	Name string `json:"name"`
+}
+
+// swagger:route GET /api/teams/check-name teams checkTeamName
+// Проверка уникальности имени команды.
+// responses:
+//
+//	200: BoolAvailability
+//	400: ErrorResponse
+//	500: ErrorResponse
 func (h *Handler) CheckTeamName(c *gin.Context) {
 	name := c.Query("name")
 	repo := repository.NewTeamRepository(h.db)
@@ -33,9 +56,26 @@ func (h *Handler) CheckTeamName(c *gin.Context) {
 	}
 }
 
-// GET /api/teams - получение списка команд.
-// Этот метод возвращает список всех команд соответствующих указанным фильтрам.
-// Если фильтры не указаны, возвращает все команды.
+// swagger:parameters listTeams
+// Получение списка команд с возможными фильтрами
+//
+// in: query
+// name: city
+// required: false
+// description: Фильтрация команд по городу
+//
+// in: query
+// name: university
+// required: false
+// description: Фильтрация команд по университету
+//
+// swagger:route GET /api/teams teams listTeams
+// Получение списка команд.
+// responses:
+//
+//	200: TeamList
+//	404: ErrorResponse
+//	500: ErrorResponse
 func (h *Handler) GetTeams(c *gin.Context) {
 	filter := repository.TeamFilter{
 		City:       c.Query("city"),
@@ -55,20 +95,63 @@ func (h *Handler) GetTeams(c *gin.Context) {
 	c.JSON(http.StatusOK, teams)
 }
 
-// DTO для приёма JSON в одном теле
+// swagger:model CreateTeamRequest
+// Запрос на создание новой команды
 type CreateTeamRequest struct {
-	Name                 string               `json:"name" binding:"required"`
-	City                 string               `json:"city" binding:"required"`
-	UniversityID         int                  `json:"university_id" binding:"required"`
-	Participants         []models.Participant `json:"participants" binding:"required,dive"`
-	ConsentPDCapitan     bool                 `json:"consent_capitan" binding:"required"`
-	ConsentPDParticipant bool                 `json:"consent_participant" binding:"required"`
-	ConsentRules         bool                 `json:"consent_rules" binding:"required"`
+	// Team name
+	// required: true
+	Name string `json:"name" binding:"required"`
+	// City name
+	// required: true
+	City string `json:"city" binding:"required"`
+	// University ID
+	// required: true
+	UniversityID int `json:"university_id" binding:"required"`
+	// Participants list
+	// required: true
+	Participants []models.Participant `json:"participants" binding:"required,dive"`
+	// Consent of captain
+	// required: true
+	ConsentPDCapitan bool `json:"consent_capitan" binding:"required"`
+	// Consent of participants
+	// required: true
+	ConsentPDParticipant bool `json:"consent_participant" binding:"required"`
+	// Consent of rules
+	// required: true
+	ConsentRules bool `json:"consent_rules" binding:"required"`
 }
 
-// POST /api/teams/ - регистрация новой команды и возвращение её идентификатора.
-// Этот метод принимает данные команды, проверяет их корректность,
-// сохраняет команду в базе данных и возвращает её уникальный идентификатор.
+// swagger:parameters createTeam
+// Создание новой команды
+// in: body
+type createTeamParams struct {
+	// in: body
+	Body CreateTeamRequest
+}
+
+// swagger:response CreateTeamResponse
+// Отввет после создания команды. Возвращает ID команды
+type CreateTeamResponse struct {
+	// in:body
+	Body struct {
+		TeamID int `json:"team_id"`
+	}
+}
+
+// swagger:response TeamList
+// Список ответов на создание команды
+type TeamList struct {
+	// in:body
+	Body []models.Team
+}
+
+// swagger:route POST /api/teams teams createTeam
+// Создание новой команды и получение ID команды
+// responses:
+//
+//	201: CreateTeamResponse
+//	400: ErrorResponse
+//	500: ErrorResponse
 func (h *Handler) CreateTeam(c *gin.Context) {
 	var req CreateTeamRequest
 	if err := c.ShouldBindJSON(&req); err != nil {

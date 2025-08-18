@@ -1,5 +1,7 @@
 package models
 
+// swagger:model Team
+// Team представляет информацию о команде
 type Team struct {
 	ID             int           `db:"id" json:"id"`
 	Name           string        `db:"name" json:"name" binding:"required,min=2"`

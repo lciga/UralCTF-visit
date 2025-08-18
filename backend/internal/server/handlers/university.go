@@ -8,6 +8,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// swagger:response UniversityList
+// Запрос списка университетов
+type UniversityList struct {
+	// in: body
+	Body []repository.University
+}
+
+// swagger:parameters searchUniversities
+// in: query
+// name: city
+// required: true
+// description: Город для поиска университета
+type searchUniversitiesParams struct {
+	City string `json:"city"`
+}
+
+// swagger:route GET /api/search/university universities searchUniversities
+// Поиск университета по городу
+// responses:
+//
+//	200: UniversityList
+//	400: ErrorResponse
+//	404: ErrorResponse
+//	500: ErrorResponse
 func (h *Handler) GetUniversity(c *gin.Context) {
 	// Получаем имя города из параметра city
 	city := c.Query("city")

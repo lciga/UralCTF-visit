@@ -1,5 +1,7 @@
 package models
 
+// swagger:model Participant
+// Participant представляет участника команды
 type Participant struct {
 	ID         int    `db:"id" json:"id"`
 	TeamID     int    `db:"team_id" json:"team_id"`

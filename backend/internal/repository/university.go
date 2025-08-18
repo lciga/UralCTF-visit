@@ -1,6 +1,7 @@
 package repository
 
-// University represents a university record for responses
+// swagger:model University
+// University представляет запись об университете в ответе
 type University struct {
 	ID   int    `db:"id" json:"id"`
 	Name string `db:"name" json:"name"`
