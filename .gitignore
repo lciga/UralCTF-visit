@@ -34,3 +34,5 @@ go.work.sum
 .vscode/
 
 backend/logs/*
+docs.md
+swagger.*
